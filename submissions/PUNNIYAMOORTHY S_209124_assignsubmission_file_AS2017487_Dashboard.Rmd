@@ -1,0 +1,34 @@
+---
+title: "DSjobtracker"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(plotly)
+library(dplyr)
+```
+
+```{r data}
+#data_new <- read.csv("D:/Desktop/Stat Consultancy/datamod.csv")
+data_new <- DStidy_2021
+
+```
+
+# Dashboard
+Column {data-width=200, .tabset}
+-----------------------------------------------------------------------
+
+### Educational Qualifications
+
+```{r}
+data1 <- data_new %>% group_by(Educational_qualifications) %>% summarise(n = n())
+
+fig1 <- plot_ly(x = data1$n,y = data1$Educational_qualifications,type = "bar", color = data1$Educational_qualifications, domain = list(x = c(0, 0.5), y = c(0, 1))) %>% 
+  layout(yaxis = list(categoryorder = "total ascending"))
+fig1
+```
+

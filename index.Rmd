@@ -678,55 +678,222 @@ plot_ly(data_new,
 
 ```
 
-Salary
+
+Software and Skills
 ======================================================
 
 
-```{r setup, include=FALSE}
+```{r nimthera, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
 library(plotly)
-library(DT)
-library(shiny)
-
-
-```
-
-Salary {}
-=====================================
-
-Row
--------------------------------------
-
-### Distibution of Average of Minimum Salaries by Job 
-
-```{r}
-
-devtools::install_github("thiyangt/DSjobtracker")
+library(treemapify)
 library(DSjobtracker)
-
-data("DStidy_2021")
-
-df <- DStidy_2021
-
-
-P <-  ggplot(df, aes(Job_Category,Salary)) + geom_col(position = "dodge", fill = "blue")+
-  coord_flip() + labs(y = "Average Yearly Salaries in USD", x = "Job Title") + scale_fill_brewer(palette = "Blues") +
-  theme_classic()
-
-ggplotly(P)
-
 ```
 
-Row
-------------------------------------
-### Distibution of Average of Minimum Salaries by Countries
+Column
+-----------------------------------------------------------------------
 
 ```{r}
-Q <- ggplot(df, aes(Country,Salary)) + geom_col(position = "dodge", fill = "blue")+
-  coord_flip() + theme_classic() + labs(y = "Average Yearly Salaries in USD", x = "Country")
 
-ggplotly(Q)
+Top_skills_required<- DStidy_2021%>%
+  select(c(AI:Web_Analytic_tools)) %>%
+  pivot_longer(c(AI:Web_Analytic_tools), values_to = "Value", names_to = "Name") %>%
+  group_by(Name) %>%
+  summarize(Total = sum(Value)) %>% 
+  arrange(Total) 
+  
+  Top_skills_required %>%
+  mutate(Name = factor(Name, levels = .$Name)) %>%
+  top_n(20) %>%
+plot_ly(
+        x= ~Total,
+        y= ~reorder(Name,Total),
+        type = "bar",
+   marker = list(color = "hsl(0,100%,50%))") ,height = 600,width = 700)  %>% 
+ 
+layout(title = "Top 20 Skills Required in Jobs",xaxis = list(title = "No of Job Advertisments"),
+         yaxis =list(title = "Skills Required"))
+```
+
+Column
+-----------------------------------------------------------------------
+
+```{r}
+
+ Soft_skills_required<- DStidy_2021%>%
+  select(c(Presentation_Skills:`agile execution`)) %>%
+  pivot_longer(c(Presentation_Skills:`agile execution`), values_to = "Value", names_to = "Name") %>%
+  group_by(Name) %>%
+  summarize(Total = sum(Value)) %>% 
+  arrange(Total) 
+
+Soft_skills_required %>%
+  plot_ly(labels = ~Name,
+          values = ~Total,
+          parents = NA,
+          type = "treemap", height = 600, width = 650) %>%
+  layout(title = "Soft Skills Required in Jobs")
 
 ```
+
+
+Software Skills
+======================================================
+
+
+```{r abishanya, include=FALSE}
+
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+library(DSjobtracker)
+data("DStidy_2021")
+```
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Statistical softwares
+
+
+```{r}
+
+Statistical_software <- paste(DStidy_2021$R,DStidy_2021$SAS,DStidy_2021$SPSS,DStidy_2021$Python,sep = "::")
+
+
+d1 <- Statistical_software %>% table() %>% as.data.frame()
+names(d1) <- c('Statistical_software', 'Frequency')
+d1 <- d1[order(d1$Frequency, decreasing = T),]
+
+Statistical_software[Statistical_software=="1::0::0::0"] <-"R only"
+Statistical_software[Statistical_software=="0::0::0::1"] <-"Python only"
+Statistical_software[Statistical_software=="0::1::0::0"] <-"SAS only"
+Statistical_software[Statistical_software=="1::0::0::1"] <-"R & Python"
+Statistical_software[Statistical_software=="1::1::0::1"] <-"R, SAS & Python only "
+Statistical_software[Statistical_software=="0::0::0::0"] <-"No statistical softwares"
+Statistical_software[Statistical_software=="0::1::0::1"|Statistical_software=="1::1::1::1" |Statistical_software=="0::1::1::1"|Statistical_software=="1::1::1::0"|Statistical_software=="1::1::0::0"] <- "Other statistical softwares"
+
+
+d1 <- Statistical_software %>% table() %>% as.data.frame()
+names(d1) <- c('Statistical_software', 'Frequency')
+d1 <- d1[order(d1$Frequency, decreasing = T),]
+
+
+d1 %>% plot_ly(x = ~Frequency, y = ~reorder(Statistical_software, Frequency), type =  'bar', orientation = 'h') %>% layout(title = "",xaxis = list(title = "Number of job advertisements" ,zeroline = FALSE), yaxis = list(title = "", zeroline = FALSE))
+```
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Database and Query languages
+
+```{r}
+Database_and_Query_languages <- paste(DStidy_2021$SQL,DStidy_2021$NoSQL,DStidy_2021$MySQL,DStidy_2021$Hadoop,sep = "::")
+
+
+d2 <- Database_and_Query_languages %>% table() %>% as.data.frame()
+names(d2) <- c('Database_and_Query_languages', 'Frequency')
+d2 <- d2[order(d2$Frequency, decreasing = T),]
+
+
+Database_and_Query_languages[Database_and_Query_languages=="1::0::0::0"] <-"SQL only"
+Database_and_Query_languages[Database_and_Query_languages=="1::0::1::0"] <-"SQL & MySQL"
+Database_and_Query_languages[Database_and_Query_languages=="1::0::0::1"] <-"SQL & Hadoop"
+Database_and_Query_languages[Database_and_Query_languages=="1::1::0::0"] <-"SQL & NoSQL"
+Database_and_Query_languages[Database_and_Query_languages=="0::0::0::0"] <-"No database or query languages"
+
+Database_and_Query_languages[Database_and_Query_languages=="0::0::1::0"|Database_and_Query_languages=="0::1::0::0" | Database_and_Query_languages=="0::0::0::1"| Database_and_Query_languages=="1::1::1::1" | Database_and_Query_languages=="1::1::0::1"| Database_and_Query_languages=="1::0::1::1"| Database_and_Query_languages=="1::1::1::0"] <- "Other"
+
+
+d2 <- Database_and_Query_languages %>% table() %>% as.data.frame()
+names(d2) <- c('Database_and_Query_languages', 'Frequency')
+d2 <- d2[order(d2$Frequency, decreasing = T),]
+
+
+d2 %>% plot_ly(x = ~Frequency, y = ~reorder(Database_and_Query_languages, Frequency), type =  'bar', orientation = 'h', color = "red") %>% layout(title = "",xaxis = list(title = "Number of job advertisment" ,zeroline = FALSE), yaxis = list(title = ""))
+
+
+```
+
+
+Knowledge and Skills
+
+======================================================
+
+
+```{r theja, include=FALSE}
+library(readr)
+library(plotly)
+library(gganimate)
+library(ggpubr)
+
+```
+
+# Knowledge and Skills
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Treemap of Konwledge and skills
+
+```{r}
+ks<-DStidy_2021%>%select(c(AI:Data_translation,Presentation_Skills:Payroll_management))
+df<-ks%>%pivot_longer(1:31,"Knowledge_and_skills","Cases")%>%group_by(Knowledge_and_skills) %>%summarize(No_of_Job_vacancies = sum(value))%>%mutate(parents="Knowledge and Skills") 
+df%>%plot_ly(type="treemap",labels=~Knowledge_and_skills,parents=~parents,values=~No_of_Job_vacancies,domain=list(column=0),textinfo="label+value+percent parent")
+```
+
+Column {data-width=350}{.tabset .tabset-fade}
+-----------------------------------------------------------------------
+
+### Required Knowledge according to job category
+
+```{r}
+Job_Titles <- str_to_lower(DStidy_2021$Job_title)
+Job_Titles <- str_trim(Job_Titles)
+Job_Titles <- str_replace_all(Job_Titles,",|-|/", " ")
+
+
+Job_Titles <-  Job_Titles %>% str_replace_all("analyzt", "analyst") 
+Job_Titles <-  Job_Titles %>% str_replace_all("acturial", "actuarial")
+
+
+DS <- Job_Titles[str_detect(Job_Titles, "([data]{4}|machine)[&a-z\\s]*([scientist]{7,10})|\\s+ai")] %>% unique() 
+
+DE <- Job_Titles[str_detect(Job_Titles, "([data]{4}|machine|intelligence)[&a-z\\s]*([engineer]{8,9})")] %>% unique()
+
+
+DA <- Job_Titles[str_detect(Job_Titles, "anal|statist|actuarial|research|statician")] %>% unique()
+DA <- DA %>% append(Job_Titles[!(Job_Titles%in%c(DS,DE,DA))] %>% unique() %>% .[str_detect(.,"data\\s+")]) 
+DS <- DS %>% append(Job_Titles[!(Job_Titles%in%c(DS,DE,DA))] %>% unique() %>% .[str_detect(.,"machine\\s+")])
+
+DA <- DA[!DA%in%DS]
+DA <- DA[!DA%in%DE]
+DS<-DS[!DS%>%is.na()]
+DE<-DE[!DE%>%is.na()]
+Unimportant <- Job_Titles[!(Job_Titles%in%c(DS,DE,DA))] %>% unique()
+
+
+DStidy_2021  <- DStidy_2021 %>% mutate(Job_Titles, Job_Category= ifelse(Job_Titles%in%DS & Job_Titles%in%DE, "Data Science and Data Engineering", ifelse(Job_Titles%in%DS, "Data Science", ifelse(Job_Titles%in%DA,"Data Analyst", "Other" ) ) )) 
+
+df1<-DStidy_2021%>%select(c(AI:Data_translation,Data_marketing:Payroll_management,Job_Category))%>%pivot_longer(1:26,"Knowledge","Cases") %>%filter(value=="1")%>%group_by(Knowledge,Job_Category)%>%count()
+p2<-ggdotchart(df1,x="Knowledge",y="n",color = "Job_Category",palette = c("#00AFBB","#E7B800","#FC4E07","#FF1493","#7FFFD4"),sorting = "asc",sort.by.groups=TRUE,add="segments",add.params = list(color="lightgray",size=2),dot.size = 4,ggtheme =theme_pubclean())+ font("x.text",size=8,vjust=0.5)+labs(x="Required Knowledge ",y="Count")
+ggpar(p2,legend.title = "")%>%ggplotly()%>%layout(legend=list(orientation="h",xanchor="center",x=0.5,y=1.6))
+
+```
+
+### Required Skills according to job category
+
+
+```{r}
+df2<-DStidy_2021%>%select(c(Presentation_Skills:"agile execution",Job_Category))%>%pivot_longer(1:5,"Skills","Cases") %>%filter(value=="1")%>%group_by(Skills,Job_Category)%>%count()
+p3<-ggdotchart(df2,x="Skills",y="n",color = "Job_Category",palette = c("#00AFBB","#E7B800","#FC4E07","#FF1493","#7FFFD4"),sorting = "asc",sort.by.groups=TRUE,add="segments",add.params = list(color="lightgray",size=2),dot.size = 4,ggtheme =theme_pubclean())+ font("x.text",size=8,vjust=0.5)+labs(x="Required Skills ",y="Count")
+ggpar(p3,legend.title = "")%>%ggplotly()%>%layout(legend=list(orientation="h",xanchor="center",x=0.5,y=1.6))
+```
+
+
+
+
 
 
 
@@ -735,9 +902,11 @@ ggplotly(Q)
 Our Team
 ======================================================
 
-Contributions
+
 
 Project Supervisor: [Dr Thiyanga S. Talagala](https://thiyanga.netlify.app/)
+
+
 
 Overview: Heshani Achinthika
 
@@ -751,7 +920,14 @@ Soft Skills: Maleesha Panangala
 
 Experience: Randi Shashikala
 
-Salary: Ann Shehani
+Software and Skills: Nimthara Gamage
+
+Software Skills: Abishanya Sundharampillai
+
+Knowledge and skills: Theja Sanduni
+
+
+
 
 
 
