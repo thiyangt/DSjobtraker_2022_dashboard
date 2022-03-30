@@ -906,7 +906,7 @@ Our Team
 
 Project Supervisor: [Dr Thiyanga S. Talagala](https://thiyanga.netlify.app/)
 
-
+**Dashboard Panels**
 
 Overview: Heshani Achinthika
 
@@ -926,6 +926,22 @@ Software Skills: Abishanya Sundharampillai
 
 Knowledge and skills: Theja Sanduni
 
+Compilation of all panels: Dr Thiyanga Talagala
+
+**Data Collection**
+
+
+Heshani Achinthika, Rashmini Rathnaweera, Janith Wanniarachchi, Ramindu De Silva,   Maleesha Panangala, Randi Shashikala, Ann Shehani, Nimthara Gamage, Abishanya Sundharampillai, Theja Sanduni
+
+
+
+**R package development co-authors/ contributors**
+
+Dr Thiyanga Talagala
+
+Janith Wanniarachchi 
+
+Randi Shashikala
 
 
 
