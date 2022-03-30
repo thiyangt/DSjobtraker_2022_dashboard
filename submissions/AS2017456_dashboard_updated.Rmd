@@ -1,0 +1,61 @@
+---
+title: "Soft Skills"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r}
+#devtools::install_github("thiyangt/DSjobtracker")
+``` 
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(DSjobtracker)
+library(viridis)
+data("DStidy_2021")
+data <- DStidy_2021
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Composition of demanded Soft Skills
+
+```{r}
+data %>% 
+  summarize(Presentation_Skills = sum(Presentation_Skills),
+            Communication = sum(Communication),
+            Team_Handling = sum(Team_Handling),
+            Problem_Solving = sum(Problem_Solving)) %>% 
+  pivot_longer(c("Presentation_Skills","Communication",
+                 "Team_Handling","Problem_Solving"),names_to = "Soft skills",values_to = "Counts") %>% 
+   mutate(`Soft skills` = fct_reorder(`Soft skills`,Counts)) %>% 
+  ggplot(aes(x = `Soft skills`,y = Counts))+
+  geom_bar(stat="identity", fill= "#0072B2")+
+  coord_flip()
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Demanded Soft Skills according to the Job Field
+
+```{r,fig.width=11,fig.height=9}
+data %>% 
+  group_by(Job_Field) %>% 
+  summarize(Presentation_Skills = sum(Presentation_Skills),
+            Communication = sum(Communication),
+            Team_Handling = sum(Team_Handling),
+            Problem_Solving = sum(Problem_Solving)) %>% 
+  pivot_longer(c("Presentation_Skills","Communication",
+                 "Team_Handling","Problem_Solving"),names_to = "Soft skills",values_to = "Counts") %>% 
+  ggplot(aes(y = `Soft skills`,x = `Job_Field`,fill=Counts),color="white")+
+  geom_tile()+
+  scale_fill_viridis()+
+  geom_label(aes(label = Counts),color="white") + 
+  coord_flip()
+```

@@ -1,0 +1,759 @@
+---
+title: "DSjobtracker"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: column
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(wordcloud)
+library(wordcloud2)
+library(tm)
+library(RColorBrewer)
+library(stringr)
+#devtools::install_github("thiyangt/DSjobtracker")
+library(DSjobtracker)
+data("DStidy_2021")
+df <- DStidy_2021
+```
+
+Overview
+======================================================
+Column
+-----------------------------------------------------------------------
+
+### *Job Title*
+```{r}
+jbs <- str_to_lower(df$Job_title)
+jbs <- gsub("[[:punct:]]"," ",jbs)
+
+
+docs1 <- Corpus(VectorSource(jbs))
+docs1 <-docs1 %>% tm_map(removePunctuation) %>%  tm_map(removeWords,c("and", "–"))
+
+
+dtm1 <-  TermDocumentMatrix(docs1)
+matrix1 <- as.matrix(dtm1)
+words1 <- sort(rowSums(matrix1),decreasing = TRUE)
+
+jbstitle <- data.frame(word1= names(words1),freq1 =words1)
+
+set.seed(500)
+
+wordcloud(words = jbstitle$word1,freq = jbstitle$freq1,  min.freq = 2,max.words=35,random.order=FALSE,font=4,family= "serif",root.per=1.5,scale = c(5,1.5),
+          colors = brewer.pal(8,"Dark2"))
+
+
+
+```
+
+### *Education Qualification* 
+```{r}
+
+edu <- str_to_lower(df$Educational_qualifications)
+edu <- gsub("[[:punct:]]"," ",edu)
+
+edu <- edu %>% str_replace_all(c(
+  "bachelor's" ="bsc",
+  "bachelors" = "bsc",
+  "bachelor" = "bsc",
+  " bachelor" = "bsc",
+  "bsc's" ="bsc",
+  "master" = "msc",
+  "masters"="msc",
+  "masterss"="msc",
+  "mscs"="msc"
+))
+
+
+
+docs2 <- Corpus(VectorSource(edu))
+
+docs2 <- tm_map(docs2,removeWords,c("any","etc","with","higher","and","other","such","related","data","field","of"))
+
+dtm2 <-  TermDocumentMatrix(docs2)
+matrix2 <- as.matrix(dtm2)
+words2 <- sort(rowSums(matrix2),decreasing = TRUE)
+
+eduQua <- data.frame(word2= names(words2),freq2 =words2)
+
+set.seed(2017)
+
+wordcloud(words = eduQua$word2,freq = eduQua$freq2,  min.freq = 2,max.words=45, random.order=FALSE,font=4,family= "serif",root.per=1.5,scale = c(5,1.5),
+          colors = brewer.pal(8,"Dark2"))
+
+
+```
+
+
+Column
+-----------------------------------------------------------------------
+
+### *Knowledge Base* 
+```{r}
+
+
+knw <- df$Knowledge_in
+
+docs3 <- Corpus(VectorSource(knw))
+docs3 <- docs3 %>% tm_map(removePunctuation)
+docs3 <- tm_map(docs3,removeWords,c("with"," knowledge","and","from","for","the","large"," etl ","using","that","our","strong","including","methods"))
+
+dtm3 <-  TermDocumentMatrix(docs3)
+matrix3 <- as.matrix(dtm3)
+words3 <- sort(rowSums(matrix3),decreasing = TRUE)
+
+knwBase <- data.frame(word3= names(words3),freq3 =words3)
+
+
+
+wordcloud(words = knwBase$word3,freq = knwBase$freq3, min.freq = 2,max.words=35, random.order=FALSE,font=4,family= "serif",root.per=1.5,scale = c(5,1.5),
+          colors = brewer.pal(8,"Dark2"))
+
+
+```
+
+### *Company Location* 
+
+```{r}
+# Data Cleaning 
+df$Location[df$Location == "110 Healthy Way, Folosm, CA"] <- "US"
+df$Location[df$Locationn == "United Kingdom"] <- "UK"
+df$Location[df$Location == "Sri Lnaka"] <- "Sri Lanka"
+df$Location[df$Location == "SL"] <- "Sri Lanka"
+df$Location[df$Location == "Bloomington, IN"  ] <- "US"
+df$Location[df$Location == "Edinburgh,London,Manchester"] <- "UK"
+df$Location[df$Location == "Nodia,Uttar Pradesh,India"] <- "India"
+df$Location[df$Location == "Melbone" ] <-  "Australia"
+df$Location[df$Location == "canada"] <- "Canada "
+df$Location[df$Location == "Pennsylvania" ] <- "US"  
+df$Location[df$Location == "united states"] <-  "US" 
+df$Location[df$Location ==  "Sri lanka" ] <- "Sri Lanka"
+df$Location[df$Location == "NewYork"] <- "US"
+df$Location[df$Location ==  "Sri lanka" ] <- "Sri Lanka"
+df$Location[df$Location == "santa monica,CA" ] <- "US"
+df$Location[df$Location ==  "Anaheim, CA"] <- "US"
+df$Location[df$Location ==  "Bengaluru, Karnataka, India"] <- "India"
+df$Location[df$Location == "United States"  ] <- "US"
+df$Location[df$Location ==  "Noida,Uttar Pradesh, India" ] <- "India"
+df$Location[df$Location == "Remote Work" ] <- "US"
+df$Location[df$Location ==  "USA" ] <- "US"
+df$Location[df$Location ==  "Canada " ] <- "Canada"
+
+df$Location[df$Location %>% is.na()] <- "US"
+
+coun <- str_to_upper(df$Location)
+coun<- gsub(" ","_",coun)
+
+docs4 <- Corpus(VectorSource(coun))
+docs4 <- tm_map(docs4,stripWhitespace)
+docs4 <- tm_map(docs4,content_transformer(str_to_title))
+dtm4 <-  TermDocumentMatrix(docs4)
+
+matrix4 <- as.matrix(dtm4)
+words4 <- sort(rowSums(matrix4),decreasing = TRUE)
+
+loc <- data.frame(word4 = names(words4),freq4 =words4)
+
+set.seed(2017)
+
+wordcloud(words = loc$word4,freq = loc$freq4, min.freq = 2,max.words=16, random.order=FALSE,font=4,family= "serif",root.per=1.5,scale = c(6,1.2),
+          colors = brewer.pal(8,"Dark2"))
+
+
+```
+
+
+Spatial Distributions
+======================================================
+
+```{r  include=FALSE}
+
+data("DStidy_2021")
+df <- DStidy_2021
+
+library(flexdashboard)
+
+library(tidyverse)
+library(plotly)
+library(data.table)
+library(countrycode)
+library(quantmod)
+library(formattable)
+
+#--------------------------------------------------#JOB TYPE
+
+df <- df %>%
+  mutate(`Job Type` = case_when(str_detect(df$Job_title, regex("Data analyst", ignore_case=TRUE))~ "Data analyst",
+         str_detect(df$Job_title, regex(c("Data scientist","Data science", "science"), ignore_case=TRUE))~ "Data Scientist",
+str_detect(df$Job_title, regex("Data Engineer", ignore_case=TRUE))~ "Data Engineer",
+str_detect(df$Job_title, regex(c("Business Intelligence", "Business Analyst"), ignore_case=TRUE))~ "BI/BA",
+str_detect(df$Job_title, regex( "Statistic", ignore_case=TRUE))~ "Statistician",
+TRUE   ~  "Other" ))
+
+
+df$`Job Type` <- as.factor(df$`Job Type`)
+
+
+```
+
+Row 
+-------------------------------------
+
+### Spatial Distribution of proportion of Job Advertisments
+    
+```{r Job advertisments map}
+
+new <- df %>%
+  select(c(Country, country_code)) %>%
+  group_by(country_code) %>%
+  count(Country) %>%
+  ungroup() %>%
+  mutate(Percentage = percent(n/sum(n)))
+
+
+fig <- plot_ly(new, type='choropleth', locations=new$country_code, z=new$Percentage, text=~paste('Country: ', 
+                                                                                                 new$Country, '<br> Count: ', new$n, '<br> Percentage: ',new$Percentage),hoverinfo = 'text',colorscale="Viridis") %>%
+        layout(title = "Spatial Distribution of Proportion of Job Advertisments - 2021")
+
+fig
+
+
+```
+
+### Advertisment Distribution by country
+
+```{r distribution by country}
+new %>%
+  plot_ly(
+  x = ~n,
+  y = ~reorder(Country,-desc(n)),
+  type = "bar",
+  orientation = "h"
+  ) %>%
+  layout(title = "Distribution of Job Advertisments by Country - 2021",
+         yaxis = list(title = "Country"), xaxis = list(title = "Total Number of Advertisments",categoryorder = "n"), barmode = 'stack')
+  
+  
+```
+
+
+Row {.tabset .tabset-fade}
+-------------------------------------
+   
+### Spatial Distribution by Job Type
+
+```{r by Job Type}
+
+
+new3 <- df %>%
+  select(c(Country, country_code, `Job Type`)) %>%
+  group_by(country_code, `Job Type`) %>%
+  count(Country)%>%
+  ungroup() %>%
+  group_by(`Job Type`) %>% 
+  mutate(Percentage = percent(n/sum(n))) %>%
+  ungroup()
+
+fig2 <- plot_ly(new3, type='choropleth', locations=new3$country_code, z=new3$Percentage, text=~paste('Country: ', 
+                                                                                                 new3$Country, '<br> Count: ', new3$n, '<br> Percentage: ',new3$Percentage),hoverinfo = 'text', colorscale="Viridis") %>%
+                add_trace(
+            transforms = list(
+              list(
+                type = "filter",
+                target = ~`Job Type`,
+                operation = 'in',
+                value = unique(new3$`Job Type`)
+              )
+            )
+  ) %>%
+  layout( title = "Spatial Distribution of Proportion of Advertisments of each Job type - 2021",
+    updatemenus = list(
+      list(
+        type = 'dropdown',
+        active = 0,
+        buttons = list(
+          list(method = "restyle",
+               args = list("transforms[0].value", unique(new3$`Job Type`)[5]),
+               label = "Data Scientist"),
+          list(method = "restyle",
+               args = list("transforms[0].value", unique(new3$`Job Type`)[3]),
+               label = "Data Analyst"),
+          list(method = "restyle",
+               args = list("transforms[0].value", unique(new3$`Job Type`)[4]),
+               label = "Data Engineer"),
+          list(method = "restyle",
+               args = list("transforms[0].value", unique(new3$`Job Type`)[6]),
+               label = "Statistician"),
+          list(method = "restyle",
+               args = list("transforms[0].value", unique(new3$`Job Type`)[2]),
+               label = "BI/BA"),
+          list(method = "restyle",
+               args = list("transforms[0].value", unique(new3$`Job Type`)[1]),
+               label = "Other")
+        )
+      )
+    )
+  )
+
+
+fig2
+
+```   
+ 
+### Spatial Distribution of Salary
+
+*The minimum annual salary of each country in USD
+    
+```{r}
+
+new2 <- df %>%
+  select(c(Country, country_code, Salary)) %>%
+  group_by(Country) %>%
+  mutate(Mean = mean(Salary, na.rm=TRUE)) %>%
+  mutate(Mean_in_K = round(Mean/1000,2))
+
+fig3 <- plot_ly(new2, type='choropleth', locations=new2$country_code, z=new2$Mean, text=~paste('Country: ', new2$Country, '<br> Salary (in thousands) ',new2$Mean_in_K),
+                hoverinfo = 'text',colorscale="Viridis") %>%
+                layout(title = "Spatial Distribution of Salary* of Job Advertisments - 2021")
+
+fig3
+
+```
+
+
+Job Fields
+======================================================
+
+```{r janith, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(DSjobtracker)
+theme_set(theme_minimal())
+data("DStidy_2021")
+df <- DStidy_2021
+# df <- read_csv("DStidy.csv") %>% 
+#   mutate(Job_Field = str_replace(Job_Field,"Information technology","IT"))
+# TODO R & Python by Job Field
+# TODO Job Field Minimum years of experience and location
+```
+
+Column
+--------------------------------------------------------------
+### Composition of Job Fields
+
+```{r}
+jf_counts <- df %>%
+  count(Job_Field) %>% 
+  mutate(Job_Field = fct_reorder(factor(Job_Field),n)) 
+
+l <- levels(jf_counts$Job_Field)
+
+jf_counts %>% 
+  mutate(Job_Field = fct_relevel(Job_Field,c("Other",l[l != "Other"]))) %>% 
+  ggplot(aes(x = Job_Field,y = n))+
+  geom_bar(stat="identity")+
+  coord_flip()
+```
+
+Column {.tabset .tabset-fade}
+--------------------------------------------------------------
+### R and Python Requirements of Job Fields
+
+```{r}
+df %>% 
+  group_by(Job_Field) %>% 
+  summarize(Total = sum(R) + sum(Python),
+            R= sum(R)*100/Total,Python = sum(Python)*100/Total) %>%
+  ungroup() %>% 
+  mutate(Job_Field = fct_reorder(Job_Field,R)) %>% 
+  pivot_longer(cols= c("R","Python"), names_to = "Language",values_to = "Counts") %>% 
+  ggplot(aes(x = Job_Field,y=Counts,fill=Language))+
+  geom_bar(stat="identity") + 
+  coord_flip() + 
+  theme(legend.position = "bottom")+
+  scale_fill_manual(values = c("#306998","#919198")) + 
+  labs(x = "Job Field",y = "Percentage Proportion within Job Field")
+```
+
+### Tableau and Microsoft Power BI Requirements of Job Fields
+
+```{r}
+df %>% 
+  group_by(Job_Field) %>% 
+  summarize(Total = sum(Tableau) + sum(`Microsoft Power BI`),
+            Tableau= sum(Tableau)*100/Total,`Microsoft Power BI` = sum(`Microsoft Power BI`)*100/Total) %>%
+  ungroup() %>% 
+  mutate(Job_Field = fct_reorder(Job_Field,Tableau)) %>% 
+  pivot_longer(cols= c("Tableau","Microsoft Power BI"), names_to = "Language",values_to = "Counts") %>% 
+  ggplot(aes(x = Job_Field,y=Counts,fill=Language))+
+  geom_bar(stat="identity") + 
+  coord_flip() + 
+  theme(legend.position = "bottom")+
+  scale_fill_manual(values = c("#ffba01","#c7233b")) + 
+  labs(x = "Job Field",y = "Percentage Proportion within Job Field")
+```
+
+### Minimum experience needed in Job Fields
+
+```{r}
+df %>% 
+  # group_by(Job_Field) %>% 
+  # summarize(Average_Min_Exp = mean(`Minimum Experience in Years`,na.rm=TRUE)) %>% 
+  ggplot(aes(x = Job_Field, y = `Minimum Experience in Years`))+
+  geom_boxplot()+
+  coord_flip()
+```
+
+English Requirement
+======================================================
+
+
+```{r ramidu, include=FALSE, warning=FALSE, message=FALSE, echo=FALSE}
+library(devtools)
+library(cli)
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(treemapify)
+#library(treemap)
+library(devtools)
+#install_github("treemap", username="mtennekes", subdir="pkg")
+#library(d3Tree)
+library(gridExtra)
+library(ggpubr)
+library(stringr)
+#library(randomcoloR)
+library(DSjobtracker)
+```
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+#devtools::install_github("thiyangt/DSjobtracker") 
+data("DStidy_2021")
+```
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+#Adjustment within job field column
+DStidy_2021$Job_Field[DStidy_2021$Job_Field == "E commerce (online sales)"] <- "E commerce"
+
+
+#Converting the first letter to capitals within job title field
+DStidy_2021 <- DStidy_2021 %>%
+  mutate(Job_title = str_to_title(Job_title))
+```
+
+
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+#Creating job category column
+DStidy_2021 <- DStidy_2021 %>%
+  mutate(Job_Category = case_when(
+    grepl(x = DStidy_2021$Job_title, pattern = "analyst", ignore.case = TRUE) ~ "Data Analyst",
+    grepl(x = DStidy_2021$Job_title, pattern = "analytics", ignore.case = TRUE) ~ "Data Analyst",
+    grepl(x = DStidy_2021$Job_title, pattern = "scientist", ignore.case = TRUE) ~ "Data Scientist",
+    grepl(x = DStidy_2021$Job_title, pattern = "science", ignore.case = TRUE) ~ "Data Scientist",
+    grepl(x = DStidy_2021$Job_title, pattern = "engineer", ignore.case = TRUE) ~ "Data Engineer"))
+
+```
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+#Recoding NA's as other within job category column
+DStidy_2021$Job_Category[is.na(DStidy_2021$Job_Category)] <- "Other"
+
+#Recoding the location column
+DStidy_2021$Location[DStidy_2021$Location == "110 Healthy Way, Folosm, CA"] <- "United States"
+DStidy_2021$Location[DStidy_2021$Location == "USA"] <- "United States"
+DStidy_2021$Location[DStidy_2021$Location == "Anaheim, CA"] <- "United States"
+DStidy_2021$Location[DStidy_2021$Location == "Bengaluru, Karnataka, India"] <- "India"
+DStidy_2021$Location[DStidy_2021$Location == "Noida,Uttar Pradesh, India"] <- "India"
+DStidy_2021$Location[DStidy_2021$Location == "Bloomington, IN"] <- "United States"
+DStidy_2021$Location[DStidy_2021$Location == "canada"] <- "Canada"
+DStidy_2021$Location[DStidy_2021$Location == "canda"] <- "Canada"
+DStidy_2021$Location[DStidy_2021$Location == "Edinburgh,London,Manchester"] <- "United Kingdom"
+DStidy_2021$Location[DStidy_2021$Location == "Melbone"] <- "Australia"
+DStidy_2021$Location[DStidy_2021$Location == "Pennsylvania"] <- "United States"
+DStidy_2021$Location[DStidy_2021$Location == "santa monica,CA"] <- "United States"
+DStidy_2021$Location[DStidy_2021$Location == "NewYork"] <- "United States"
+DStidy_2021$Location[DStidy_2021$Location == "SL"] <- NA
+DStidy_2021$Location[DStidy_2021$Location == "Sri Lnaka"] <- NA
+DStidy_2021$Location[DStidy_2021$Location == "Remote Work"] <- NA
+DStidy_2021$Location[DStidy_2021$Location == "NA"] <- NA
+DStidy_2021$Location[DStidy_2021$Location == "UK"] <- "United Kingdom"
+
+```
+
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+#Converting selected columns to factors
+fc1 <- c(8, 18)
+DStidy_2021[,fc1] <- lapply(DStidy_2021[,fc1], factor)
+```
+
+
+
+
+## Column {data-width=500}
+
+### English Requirement by Country
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#Renaming categories within the English Needed column
+levels(DStidy_2021$`English Needed`) <- c("No", "Yes")
+
+#2021 English requirement by country
+DStidy_2021 %>%
+  drop_na(Location) %>%
+  ggplot(mapping = aes(x = Location, fill = `English Needed`)) +
+  geom_bar(position = "fill") +
+  stat_count(geom = "text", mapping = aes(label = stat(count)),
+             position = position_fill(vjust = 0.5), colour = "white") +
+  labs(x = "Country", y = "Proportion") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), legend.position = "top") +
+  coord_flip()
+
+```
+
+
+## Column {data-width=500, .tabset}
+
+### English Requirement by Job Field
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+DStidy_2021 %>%
+  drop_na(Job_Field) %>%
+  ggplot(mapping = aes(x = Job_Field, fill = `English Needed`)) +
+  geom_bar(position = "fill") +
+  stat_count(geom = "text", mapping = aes(label = stat(count)),
+             position = position_fill(vjust = 0.5), colour = "white") +
+  labs(x = "Job Field", y = "Proportion") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), legend.position = "top") +
+  coord_flip()
+
+```
+
+
+### English Requirement by Job Category
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+DStidy_2021 %>%
+  drop_na(Job_Category) %>%
+  ggplot(mapping = aes(x = Job_Category, fill = `English Needed`)) +
+  geom_bar(position = "fill") +
+  stat_count(geom = "text", mapping = aes(label = stat(count)),
+             position = position_fill(vjust = 0.5), colour = "white") +
+  labs(x = "Job Category", y = "Proportion") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), legend.position = "top") 
+
+```
+
+
+Soft Skills
+======================================================
+
+```{r maleesha, include=FALSE}
+library(viridis)
+data("DStidy_2021")
+data <- DStidy_2021
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Composition of demanded Soft Skills
+
+```{r}
+data %>% 
+  summarize(Presentation_Skills = sum(Presentation_Skills),
+            Communication = sum(Communication),
+            Team_Handling = sum(Team_Handling),
+            Problem_Solving = sum(Problem_Solving)) %>% 
+  pivot_longer(c("Presentation_Skills","Communication",
+                 "Team_Handling","Problem_Solving"),names_to = "Soft skills",values_to = "Counts") %>% 
+   mutate(`Soft skills` = fct_reorder(`Soft skills`,Counts)) %>% 
+  ggplot(aes(x = `Soft skills`,y = Counts))+
+  geom_bar(stat="identity", fill= "#0072B2")+
+  coord_flip()
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Demanded Soft Skills according to the Job Field
+
+```{r,fig.width=11,fig.height=9}
+data %>% 
+  group_by(Job_Field) %>% 
+  summarize(Presentation_Skills = sum(Presentation_Skills),
+            Communication = sum(Communication),
+            Team_Handling = sum(Team_Handling),
+            Problem_Solving = sum(Problem_Solving)) %>% 
+  pivot_longer(c("Presentation_Skills","Communication",
+                 "Team_Handling","Problem_Solving"),names_to = "Soft skills",values_to = "Counts") %>% 
+  ggplot(aes(y = `Soft skills`,x = `Job_Field`,fill=Counts),color="white")+
+  geom_tile()+
+  scale_fill_viridis()+
+  geom_label(aes(label = Counts),color="white") + 
+  coord_flip()
+```
+
+
+Experience
+======================================================
+
+
+
+```{r}
+## Packages
+library(tidyverse)
+library(plotly)
+library(DSjobtracker)
+```
+
+
+```{r}
+## Install the data set
+data("DStidy_2021")
+
+```
+
+column{}
+----------------------------------------------------------------------
+
+### Distribution of Minimun Years of Experience
+
+```{r}
+plot_ly(DStidy_2021,
+        x = ~`Minimum Experience in Years`,
+        type = "histogram") %>%
+  layout(xaxis = list(title = "Minimum Required Experience in Years"),
+         yaxis = list(title = "No of Job Advertisements"), 
+         showlegend = FALSE)
+```
+
+column{.tabset}
+-----------------------------------------------------------------------
+
+### Distribution of Experience by Job Category
+
+
+```{r}
+data_exp <- DStidy_2021 %>% filter(Job_Category != "Others")
+plot_ly(data_exp,
+        x = ~Job_Category,
+        y = ~`Minimum Experience in Years`,
+        type = "box",
+        color = ~Job_Category,
+        colors = c("#1b9e77", "#d95f02", "#7570b3", "#e7298a")) %>%
+  layout(xaxis = list(title  = "Job Category", tickangle = 0),
+         yaxis = list(title = "Minimum Required Experience in Years"), showlegend = FALSE)
+```
+
+
+### Distribution of Experience by Educational Qualifications
+
+```{r}
+data <- DStidy_2021
+data_new <- pivot_longer(data, c(110:112), names_to = "Education", values_to = "Value")
+
+
+data_new <- data_new %>% filter(Value == "Yes")
+plot_ly(data_new,
+        x = ~Education,
+        y = ~`Minimum Experience in Years`,
+        type = "box",
+        color = ~Education,
+        colors = c("#e41a1c", "#377eb8", "#4daf4a")) %>%
+  layout(xaxis = list(title  = "Minimum Educational Qualifications", tickangle = 0),
+         yaxis = list(title = "Minimum Required Experience in Years"), showlegend = FALSE)
+
+```
+
+Salary
+======================================================
+
+
+```{r setup, include=FALSE}
+library(plotly)
+library(DT)
+library(shiny)
+
+
+```
+
+Salary {}
+=====================================
+
+Row
+-------------------------------------
+
+### Distibution of Average of Minimum Salaries by Job 
+
+```{r}
+
+devtools::install_github("thiyangt/DSjobtracker")
+library(DSjobtracker)
+
+data("DStidy_2021")
+
+df <- DStidy_2021
+
+
+P <-  ggplot(df, aes(Job_Category,Salary)) + geom_col(position = "dodge", fill = "blue")+
+  coord_flip() + labs(y = "Average Yearly Salaries in USD", x = "Job Title") + scale_fill_brewer(palette = "Blues") +
+  theme_classic()
+
+ggplotly(P)
+
+```
+
+Row
+------------------------------------
+### Distibution of Average of Minimum Salaries by Countries
+
+```{r}
+Q <- ggplot(df, aes(Country,Salary)) + geom_col(position = "dodge", fill = "blue")+
+  coord_flip() + theme_classic() + labs(y = "Average Yearly Salaries in USD", x = "Country")
+
+ggplotly(Q)
+
+```
+
+
+
+
+
+Our Team
+======================================================
+
+Contributions
+
+Project Supervisor: [Dr Thiyanga S. Talagala](https://thiyanga.netlify.app/)
+
+Overview: Heshani Achinthika
+
+Spatial Distributions: Rashmini Rathnaweera
+
+Job Field: Janith Wanniarachchi
+
+English Requirement: Ramindu De Silva
+
+Soft Skills: Maleesha Panangala
+
+Experience: Randi Shashikala
+
+Salary: Ann Shehani
+
+
+
+
+
