@@ -894,9 +894,95 @@ ggpar(p3,legend.title = "")%>%ggplotly()%>%layout(legend=list(orientation="h",xa
 
 
 
+```{r silaxsha, include=FALSE}
+library(flexdashboard)
+library(plotly)
+library(dplyr)
+```
+
+```{r data}
+data_new <- read.csv("datamod.csv")
+
+```
+
+# Education
+
+Column {data-width=200, .tabset}
+-----------------------------------------------------------------------
+
+### Educational Qualifications
+
+```{r}
+data1 <- data_new %>% group_by(Educational_qualifications) %>% summarise(n = n())
+
+fig1 <- plot_ly(x = data1$n,y = data1$Educational_qualifications,type = "bar", color = data1$Educational_qualifications, domain = list(x = c(0, 0.5), y = c(0, 1))) %>% 
+  layout(yaxis = list(categoryorder = "total ascending"))
+fig1
+```
 
 
 
+
+```{r ann, include=FALSE}
+library(flexdashboard)
+library(plotly)
+library(tidyverse)
+library(DT)
+library(shiny)
+
+
+```
+Salary {}
+=====================================
+
+Row
+-------------------------------------
+
+### Distibution of Average of Minimum Salaries by Job 
+
+```{r}
+
+devtools::install_github("thiyangt/DSjobtracker")
+library(DSjobtracker)
+
+data("DStidy_2021")
+
+df <- DStidy_2021
+
+df_1 <- subset(df, df$Salary < 250000)
+
+
+
+   plot_ly(df_1,
+              x = df_1$Salary,
+              color = df_1$Job_Category,
+              colors = "Paired",
+              type = "box") %>%
+  layout(title = "",
+         xaxis = list(title = "Yearly Salary in USD" ,
+                      zeroline = FALSE))
+
+
+```
+
+
+Row
+------------------------------------
+### Distibution of Average of Minimum Salaries by Countries
+
+```{r}
+
+  
+   plot_ly(df_1,
+              x = df_1$Salary,
+              color = df_1$Country,
+              colors = "Paired",
+              type = "box") %>%
+  layout(title = "",
+         xaxis = list(title = "Yearly Salary in USD" ,
+                      zeroline = FALSE))
+
+```
 
 
 Our Team
@@ -925,6 +1011,12 @@ Software and Skills: Nimthara Gamage
 Software Skills: Abishanya Sundharampillai
 
 Knowledge and skills: Theja Sanduni
+
+Education: Silaxsha Punniyamoorthy
+
+Salary: Ann Shehani
+
+
 
 Compilation of all panels: Dr Thiyanga Talagala
 
