@@ -1,5 +1,5 @@
 ---
-title: "DSjobtracker"
+title: "DSjobtracker: What are the qualifications and skills that a data scientist, statistician, or data analyst must possess?"
 output: 
   flexdashboard::flex_dashboard:
     orientation: column
@@ -691,8 +691,10 @@ library(treemapify)
 library(DSjobtracker)
 ```
 
-Column
+Column {data-width=500}
 -----------------------------------------------------------------------
+
+### Top 20 skills required in jobs
 
 ```{r}
 
@@ -716,8 +718,12 @@ layout(title = "Top 20 Skills Required in Jobs",xaxis = list(title = "No of Job 
          yaxis =list(title = "Skills Required"))
 ```
 
-Column
+
+
+Column {data-width=500}
 -----------------------------------------------------------------------
+
+### Soft skills required in jobs
 
 ```{r}
 
@@ -1027,7 +1033,7 @@ Heshani Achinthika, Rashmini Rathnaweera, Janith Wanniarachchi, Ramindu De Silva
 
 
 
-**R package development co-authors/ contributors**
+**R package development authors/ co-authors/ contributors**
 
 Dr Thiyanga Talagala
 
@@ -1035,7 +1041,7 @@ Janith Wanniarachchi
 
 Randi Shashikala
 
-
+Link to the package: [here](https://github.com/thiyangt/DSjobtracker)
 
 
 
