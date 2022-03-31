@@ -342,6 +342,7 @@ df <- DStidy_2021
 
 Column
 --------------------------------------------------------------
+
 ### Composition of Job Fields
 
 ```{r}
@@ -360,6 +361,7 @@ jf_counts %>%
 
 Column {.tabset .tabset-fade}
 --------------------------------------------------------------
+
 ### R and Python Requirements of Job Fields
 
 ```{r}
