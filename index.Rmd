@@ -909,9 +909,20 @@ library(dplyr)
 ```
 
 ```{r data}
-data_new <- read.csv("datamod.csv")
+data_sil <- DSjobtracker::DStidy_2021 %>% mutate(Educational_qualification_sil = 
+                      case_when(
+                        str_detect(Educational_qualifications,
+                                   "BSc|Bachelor|B\\.Sc|bachelor|Bsc|bsc|BS|BA|BE|B\\.E.|B\\.S\\.") ~ "Min_Bachelors",
+                        str_detect(Educational_qualifications, "MSc|Msc|msc|Master|masters|M\\.S\\.|MS|PG|Post\\sgraduate|Postgraduate|Post-graduate|postgraduate|post\\sgraduate") ~ "Min_MSC",
+                        str_detect(Educational_qualifications,"Tertiary|tertiary|Graduate|degree\\sin|Degree|degree\\.|degree|Science\\sdegree|undergraduate") ~ "Some degree",
+                        str_detect(Educational_qualifications, "PhD|Phd|Ph\\.D|Doctor|phd|PHD") ~ "PHD",
+                        str_detect(Educational_qualifications,
+                                   "Experience|experience|O/L|A\\slevel|diploma|background|Background|foundation|Qualification|mathematics|Mathematics") ~ "Other",
+                        str_detect(Educational_qualifications,"|na|NA") ~ NA_character_,
+                        TRUE ~ Educational_qualifications)) %>% 
+  count(Educational_qualification_sil)
+``` 
 
-```
 
 # Education
 
@@ -921,9 +932,7 @@ Column {data-width=200, .tabset}
 ### Educational Qualifications
 
 ```{r}
-data1 <- data_new %>% group_by(Educational_qualifications) %>% summarise(n = n())
-
-fig1 <- plot_ly(x = data1$n,y = data1$Educational_qualifications,type = "bar", color = data1$Educational_qualifications, domain = list(x = c(0, 0.5), y = c(0, 1))) %>% 
+fig1 <- plot_ly(x = data_sil$n,y = data_sil$Educational_qualification_sil,type = "bar", color = data_sil$Educational_qualification_sil, domain = list(x = c(0, 0.5), y = c(0, 1))) %>% 
   layout(yaxis = list(categoryorder = "total ascending"))
 fig1
 ```
