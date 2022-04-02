@@ -1009,6 +1009,7 @@ Row
 Our Team
 ======================================================
 
+<a href='hexsticker.png'><img src='hexsticker.png' align="right"  width="200"/></a>
 
 
 Project Supervisor: [Dr Thiyanga S. Talagala](https://thiyanga.netlify.app/)
@@ -1039,7 +1040,7 @@ Salary: Ann Shehani
 
 
 
-Compilation of all panels: Dr Thiyanga Talagala
+Final dashboard design and development: Dr Thiyanga S. Talagala
 
 **Data Collection**
 
