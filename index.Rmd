@@ -5,7 +5,12 @@ output:
     orientation: column
     vertical_layout: fill
 ---
-
+<style>
+.tab-content{
+position:relative;
+top:50px;
+}
+</style>
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(wordcloud)
@@ -164,7 +169,6 @@ wordcloud(words = loc$word4,freq = loc$freq4, min.freq = 2,max.words=16, random.
 
 
 ```
-
 
 Spatial Distributions
 ======================================================
